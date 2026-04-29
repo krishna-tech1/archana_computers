@@ -42,10 +42,9 @@ func main() {
 	})
 
 	app.Use(cors.New(cors.Config{
-		AllowOrigins:     "*",
-		AllowMethods:     "GET,POST,PATCH,DELETE,OPTIONS",
-		AllowHeaders:     "Origin, Content-Type, Accept, Authorization",
-		AllowCredentials: true,
+		AllowOrigins: "*",
+		AllowMethods: "GET,POST,PATCH,DELETE,OPTIONS",
+		AllowHeaders: "Content-Type",
 	}))
 	app.Use(recovermw.New())
 	app.Use(logger.New())
