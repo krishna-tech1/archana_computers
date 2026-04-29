@@ -14,6 +14,7 @@ import (
 	api "github.com/Maestrominds/archana-computers-ticketing/internal/http"
 	"github.com/Maestrominds/archana-computers-ticketing/internal/http/handlers"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	recovermw "github.com/gofiber/fiber/v2/middleware/recover"
 )
@@ -40,6 +41,12 @@ func main() {
 		IdleTimeout:  60 * time.Second,
 	})
 
+	app.Use(cors.New(cors.Config{
+		AllowOrigins:     "*",
+		AllowMethods:     "GET,POST,PATCH,DELETE,OPTIONS",
+		AllowHeaders:     "Origin, Content-Type, Accept, Authorization",
+		AllowCredentials: true,
+	}))
 	app.Use(recovermw.New())
 	app.Use(logger.New())
 

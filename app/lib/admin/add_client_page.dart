@@ -211,24 +211,31 @@ class _AddClientPageState extends State<AddClientPage> {
 
               // Phone (numbers only, max 12)
               _buildField(
-                label: 'Phone Number',
+                label: 'Phone Number *',
                 hint: '9876543210',
                 controller: _phoneController,
                 keyboardType: TextInputType.number,
                 maxLength: 12,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                validator: (_) => null,
+                validator: (val) {
+                  if (val == null || val.trim().isEmpty) return 'Phone number is required';
+                  if (val.trim().length < 10) return 'Enter a valid phone number';
+                  return null;
+                },
               ),
               const SizedBox(height: 20),
 
               // Address (max 250)
               _buildField(
-                label: 'Address',
+                label: 'Address *',
                 hint: 'Street, City, Postal Code',
                 controller: _addressController,
                 maxLines: 3,
                 maxLength: 250,
-                validator: (_) => null,
+                validator: (val) {
+                  if (val == null || val.trim().isEmpty) return 'Address is required';
+                  return null;
+                },
               ),
               const SizedBox(height: 24),
 

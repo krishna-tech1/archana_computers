@@ -20,8 +20,8 @@ class ApiService {
 
     _dio = Dio(BaseOptions(
       baseUrl: _baseUrl,
-      connectTimeout: const Duration(seconds: 10),
-      receiveTimeout: const Duration(seconds: 10),
+      connectTimeout: const Duration(seconds: 30),
+      receiveTimeout: const Duration(seconds: 30),
       headers: {'Content-Type': 'application/json'},
       // Do NOT follow redirects automatically – let us handle 401s.
       validateStatus: (status) => status != null && status < 500,

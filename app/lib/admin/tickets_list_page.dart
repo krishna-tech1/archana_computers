@@ -192,6 +192,17 @@ class _TicketsListPageState extends State<TicketsListPage> {
               style: const TextStyle(color: Color(0xFF0D1B3E), fontWeight: FontWeight.bold, fontSize: 17)),
           const SizedBox(height: 4),
           Text(ticket.type, style: TextStyle(color: Colors.grey[600], fontSize: 13)),
+          if (ticket.clientName.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Icon(Icons.person_outline, size: 14, color: Colors.grey[500]),
+                const SizedBox(width: 4),
+                Text(ticket.clientName,
+                    style: TextStyle(color: Colors.grey[500], fontSize: 12, fontWeight: FontWeight.w500)),
+              ],
+            ),
+          ],
           const SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,

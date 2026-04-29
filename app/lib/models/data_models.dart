@@ -46,6 +46,8 @@ class Ticket {
   final String remarks;
   final String status; // raw string from backend: "new" | "processing" | "completed"
   final String clientId;
+  final String clientName;
+  final String clientEmail;
 
   Ticket({
     required this.id,
@@ -55,6 +57,8 @@ class Ticket {
     required this.remarks,
     required this.status,
     required this.clientId,
+    this.clientName = '',
+    this.clientEmail = '',
   });
 
   factory Ticket.fromJson(Map<String, dynamic> json) {
@@ -66,6 +70,8 @@ class Ticket {
       remarks: json['remarks'] ?? '',
       status: json['status'] ?? 'new',
       clientId: json['client_id'] ?? '',
+      clientName: json['client_name'] ?? '',
+      clientEmail: json['client_email'] ?? '',
     );
   }
 

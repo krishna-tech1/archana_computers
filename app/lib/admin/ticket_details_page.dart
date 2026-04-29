@@ -176,6 +176,29 @@ class _TicketDetailsPageState extends State<TicketDetailsPage> {
                 ],
               ),
             ),
+            const SizedBox(height: 20),
+
+            // Client info card
+            if (widget.ticket.clientName.isNotEmpty) ...[
+              const Text('Client Information',
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF0D1B3E))),
+              const SizedBox(height: 12),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF1F4F8),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  children: [
+                    _buildClientRow(Icons.person_outline, widget.ticket.clientName),
+                    const SizedBox(height: 10),
+                    _buildClientRow(Icons.email_outlined, widget.ticket.clientEmail),
+                  ],
+                ),
+              ),
+            ],
             const SizedBox(height: 28),
 
             // Status update section
@@ -316,6 +339,18 @@ class _TicketDetailsPageState extends State<TicketDetailsPage> {
           ),
         );
       }).toList(),
+    );
+  }
+  Widget _buildClientRow(IconData icon, String text) {
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: const Color(0xFF0D1B3E)),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(text,
+              style: const TextStyle(fontSize: 13, color: Color(0xFF0D1B3E), fontWeight: FontWeight.w500)),
+        ),
+      ],
     );
   }
 }
