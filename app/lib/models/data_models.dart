@@ -4,15 +4,17 @@
 class UserSession {
   final String id;
   final String email;
+  final String name;
   final String role; // "admin" or "client"
   final String? clientId; // For clients, the backend returns this
 
-  UserSession({required this.id, required this.email, required this.role, this.clientId});
+  UserSession({required this.id, required this.email, required this.name, required this.role, this.clientId});
 
   factory UserSession.fromJson(Map<String, dynamic> json) {
     return UserSession(
       id: json['id'] ?? '',
       email: json['email'] ?? '',
+      name: json['name'] ?? '',
       role: json['role'] ?? '',
       clientId: json['client_id'],
     );
@@ -24,14 +26,24 @@ class Client {
   final String id;
   final String name;
   final String email;
+  final String phone;
+  final String address;
 
-  Client({required this.id, required this.name, required this.email});
+  Client({
+    required this.id,
+    required this.name,
+    required this.email,
+    this.phone = '',
+    this.address = '',
+  });
 
   factory Client.fromJson(Map<String, dynamic> json) {
     return Client(
       id: json['id'] ?? '',
       name: json['name'] ?? '',
       email: json['email'] ?? '',
+      phone: json['phone'] ?? '',
+      address: json['address'] ?? '',
     );
   }
 }

@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
-import 'login_page.dart';
+import 'services/api_service.dart';
+import 'splash_screen.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize API service (cookies, storage)
+  await ApiService().init();
+  
   runApp(const ArchanaComputersApp());
 }
 
@@ -16,9 +22,9 @@ class ArchanaComputersApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF0D1B3E)),
         useMaterial3: true,
-        fontFamily: 'Roboto', // Defaulting to Roboto, can be changed later
+        fontFamily: 'Roboto',
       ),
-      home: const LoginPage(),
+      home: const SplashScreen(),
     );
   }
 }

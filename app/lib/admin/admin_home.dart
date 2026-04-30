@@ -7,6 +7,7 @@ import '../services/api_service.dart';
 import 'add_client_page.dart';
 import 'clients_list_page.dart';
 import 'tickets_list_page.dart';
+import 'ticket_details_page.dart';
 
 class AdminHome extends StatefulWidget {
   final UserSession session;
@@ -62,76 +63,115 @@ class _AdminHomeState extends State<AdminHome> {
   }
 
   void _showAccountPopup() {
-    showDialog(
+    showGeneralDialog(
       context: context,
-      builder: (ctx) => Dialog(
-        alignment: Alignment.topRight,
-        insetPadding: const EdgeInsets.only(top: 72, right: 16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  CircleAvatar(
-                    backgroundColor: const Color(0xFF0D1B3E),
-                    radius: 20,
-                    child: Text(
-                      widget.session.email.isNotEmpty ? widget.session.email[0].toUpperCase() : 'A',
-                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+      barrierDismissible: true,
+      barrierLabel: 'Dismiss',
+      transitionDuration: const Duration(milliseconds: 250),
+      pageBuilder: (ctx, anim1, anim2) => Container(),
+      transitionBuilder: (ctx, anim1, anim2, child) {
+        return FadeTransition(
+          opacity: anim1,
+          child: ScaleTransition(
+            scale: CurvedAnimation(parent: anim1, curve: Curves.easeOutBack),
+            child: Dialog(
+              alignment: Alignment.topRight,
+              insetPadding: const EdgeInsets.only(top: 60, right: 16),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              elevation: 20,
+              shadowColor: Colors.black26,
+              child: Container(
+                width: 220,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const SizedBox(height: 24),
+                    const Icon(Icons.account_circle_outlined, size: 40, color: Color(0xFF0D1B3E)),
+                    const SizedBox(height: 12),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        widget.session.email,
+                        style: const TextStyle(
+                          color: Color(0xFF0D1B3E),
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('Admin',
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF0D1B3E))),
-                        Text(widget.session.email,
-                            style: TextStyle(color: Colors.grey[600], fontSize: 12),
-                            overflow: TextOverflow.ellipsis),
-                      ],
+                    const SizedBox(height: 24),
+                    const Divider(height: 1),
+                    InkWell(
+                      onTap: () {
+                        showDialog(
+                          context: ctx,
+                          builder: (confirmCtx) => AlertDialog(
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            title: const Text('Logout', style: TextStyle(fontWeight: FontWeight.bold)),
+                            content: const Text('Are you sure you want to log out?'),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(confirmCtx),
+                                child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+                              ),
+                              TextButton(
+                                onPressed: () async {
+                                  Navigator.pop(confirmCtx); // Close confirm dialog
+                                  Navigator.of(ctx).pop(); // Close popup
+                                  await ApiService().logout();
+                                  if (!mounted) return;
+                                  Navigator.of(context).pushAndRemoveUntil(
+                                    MaterialPageRoute(builder: (_) => const LoginPage()),
+                                    (route) => false,
+                                  );
+                                },
+                                child: const Text('Logout', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                      borderRadius: const BorderRadius.only(
+                        bottomLeft: Radius.circular(20),
+                        bottomRight: Radius.circular(20),
+                      ),
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        decoration: BoxDecoration(
+                          color: Colors.red.withValues(alpha: 0.05),
+                          borderRadius: const BorderRadius.only(
+                            bottomLeft: Radius.circular(20),
+                            bottomRight: Radius.circular(20),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.logout_rounded, size: 16, color: Colors.red[700]),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Logout',
+                              style: TextStyle(color: Colors.red[700], fontWeight: FontWeight.w800, fontSize: 13),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              const Divider(height: 1, thickness: 1),
-              const SizedBox(height: 12),
-              InkWell(
-                onTap: () async {
-                  Navigator.of(ctx).pop();
-                  await ApiService().logout();
-                  if (!mounted) return;
-                  Navigator.of(context).pushAndRemoveUntil(
-                    MaterialPageRoute(builder: (_) => const LoginPage()),
-                    (route) => false,
-                  );
-                },
-                borderRadius: BorderRadius.circular(8),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                  decoration: BoxDecoration(color: Colors.red[50], borderRadius: BorderRadius.circular(8)),
-                  child: Row(
-                    children: [
-                      Icon(Icons.logout, size: 18, color: Colors.red[700]),
-                      const SizedBox(width: 10),
-                      Text('Logout',
-                          style: TextStyle(
-                              color: Colors.red[700], fontWeight: FontWeight.w600, fontSize: 14)),
-                    ],
-                  ),
+                  ],
                 ),
               ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -305,14 +345,14 @@ class _AdminHomeState extends State<AdminHome> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4))],
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 10, offset: const Offset(0, 4))],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
             padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(color: iconColor.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
+            decoration: BoxDecoration(color: iconColor.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
             child: Icon(icon, color: iconColor, size: 24),
           ),
           const SizedBox(height: 12),
@@ -342,37 +382,98 @@ class _AdminHomeState extends State<AdminHome> {
         statusBg = Colors.orange[50]!;
     }
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4))],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Text(ticket.title,
-                    style: const TextStyle(color: Color(0xFF0D1B3E), fontWeight: FontWeight.bold, fontSize: 15),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis),
+    return GestureDetector(
+      onTap: () async {
+        await Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => TicketDetailsPage(ticket: ticket)),
+        );
+        _loadHomeData(); // Refresh on return
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 15,
+              offset: const Offset(0, 8),
+            )
+          ],
+          border: Border.all(color: Colors.grey.shade50),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade50,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    '#${ticket.ticketNo}',
+                    style: TextStyle(
+                      color: Colors.grey[500],
+                      fontWeight: FontWeight.w800,
+                      fontSize: 10,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: statusBg,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: statusColor.withValues(alpha: 0.1)),
+                  ),
+                  child: Text(
+                    ticket.statusLabel.toUpperCase(),
+                    style: TextStyle(
+                      color: statusColor,
+                      fontSize: 9,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              ticket.title,
+              style: const TextStyle(
+                color: Color(0xFF0D1B3E),
+                fontWeight: FontWeight.w800,
+                fontSize: 16,
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                decoration: BoxDecoration(color: statusBg, borderRadius: BorderRadius.circular(20)),
-                child: Text(ticket.statusLabel,
-                    style: TextStyle(color: statusColor, fontSize: 12, fontWeight: FontWeight.w500)),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(ticket.type, style: TextStyle(color: Colors.grey[700], fontSize: 13)),
-        ],
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 6),
+            Row(
+              children: [
+                Icon(Icons.category_rounded, size: 14, color: Colors.grey[400]),
+                const SizedBox(width: 6),
+                Text(
+                  ticket.type,
+                  style: TextStyle(
+                    color: Colors.grey[600],
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

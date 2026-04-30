@@ -39,6 +39,9 @@ class _LoginPageState extends State<LoginPage> {
 
     try {
       final UserSession session = await ApiService().login(email, password);
+      
+      // Save session for persistence
+      await ApiService().saveSession(session);
 
       if (!mounted) return;
 
@@ -100,7 +103,7 @@ class _LoginPageState extends State<LoginPage> {
               children: [
                 const SizedBox(height: 60),
                 Image.asset(
-                  'assets/images/logo.jpg',
+                  'assets/images/app_icon.png',
                   height: 100,
                   fit: BoxFit.contain,
                 ),

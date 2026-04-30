@@ -6,6 +6,7 @@ import '../services/api_service.dart';
 import '../login_page.dart';
 import 'client_tickets_page.dart';
 import 'raise_ticket_page.dart';
+import 'client_ticket_details_page.dart';
 
 class ClientHome extends StatefulWidget {
   final UserSession session;
@@ -48,74 +49,115 @@ class _ClientHomeState extends State<ClientHome> {
   }
 
   void _showAccountPopup() {
-    showDialog(
+    showGeneralDialog(
       context: context,
-      builder: (ctx) => Dialog(
-        alignment: Alignment.topRight,
-        insetPadding: const EdgeInsets.only(top: 72, right: 16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  CircleAvatar(
-                    backgroundColor: const Color(0xFF0D1B3E),
-                    radius: 20,
-                    child: Text(
-                      widget.session.email.isNotEmpty ? widget.session.email[0].toUpperCase() : 'C',
-                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+      barrierDismissible: true,
+      barrierLabel: 'Dismiss',
+      transitionDuration: const Duration(milliseconds: 250),
+      pageBuilder: (ctx, anim1, anim2) => Container(),
+      transitionBuilder: (ctx, anim1, anim2, child) {
+        return FadeTransition(
+          opacity: anim1,
+          child: ScaleTransition(
+            scale: CurvedAnimation(parent: anim1, curve: Curves.easeOutBack),
+            child: Dialog(
+              alignment: Alignment.topRight,
+              insetPadding: const EdgeInsets.only(top: 60, right: 16),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              elevation: 20,
+              shadowColor: Colors.black26,
+              child: Container(
+                width: 220, // More compact width
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const SizedBox(height: 24),
+                    const Icon(Icons.account_circle_outlined, size: 40, color: Color(0xFF0D1B3E)),
+                    const SizedBox(height: 12),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        widget.session.email,
+                        style: const TextStyle(
+                          color: Color(0xFF0D1B3E),
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('Client',
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF0D1B3E))),
-                        Text(widget.session.email,
-                            style: TextStyle(color: Colors.grey[600], fontSize: 12),
-                            overflow: TextOverflow.ellipsis),
-                      ],
+                    const SizedBox(height: 24),
+                    const Divider(height: 1),
+                    InkWell(
+                      onTap: () {
+                        showDialog(
+                          context: ctx,
+                          builder: (confirmCtx) => AlertDialog(
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            title: const Text('Logout', style: TextStyle(fontWeight: FontWeight.bold)),
+                            content: const Text('Are you sure you want to log out?'),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(confirmCtx),
+                                child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+                              ),
+                              TextButton(
+                                onPressed: () async {
+                                  Navigator.pop(confirmCtx); // Close confirm dialog
+                                  Navigator.of(ctx).pop(); // Close popup
+                                  await ApiService().logout();
+                                  if (!mounted) return;
+                                  Navigator.of(context).pushAndRemoveUntil(
+                                    MaterialPageRoute(builder: (_) => const LoginPage()),
+                                    (route) => false,
+                                  );
+                                },
+                                child: const Text('Logout', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                      borderRadius: const BorderRadius.only(
+                        bottomLeft: Radius.circular(20),
+                        bottomRight: Radius.circular(20),
+                      ),
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        decoration: BoxDecoration(
+                          color: Colors.red.withValues(alpha: 0.05),
+                          borderRadius: const BorderRadius.only(
+                            bottomLeft: Radius.circular(20),
+                            bottomRight: Radius.circular(20),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.logout_rounded, size: 16, color: Colors.red[700]),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Logout',
+                              style: TextStyle(color: Colors.red[700], fontWeight: FontWeight.w800, fontSize: 13),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              const Divider(height: 1, thickness: 1),
-              const SizedBox(height: 12),
-              InkWell(
-                onTap: () async {
-                  Navigator.of(ctx).pop();
-                  await ApiService().logout();
-                  if (!mounted) return;
-                  Navigator.of(context).pushAndRemoveUntil(
-                    MaterialPageRoute(builder: (_) => const LoginPage()),
-                    (route) => false,
-                  );
-                },
-                borderRadius: BorderRadius.circular(8),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                  decoration: BoxDecoration(color: Colors.red[50], borderRadius: BorderRadius.circular(8)),
-                  child: Row(
-                    children: [
-                      Icon(Icons.logout, size: 18, color: Colors.red[700]),
-                      const SizedBox(width: 10),
-                      Text('Logout',
-                          style: TextStyle(color: Colors.red[700], fontWeight: FontWeight.w600, fontSize: 14)),
-                    ],
-                  ),
+                  ],
                 ),
               ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -142,7 +184,7 @@ class _ClientHomeState extends State<ClientHome> {
                 child: CircleAvatar(
                   backgroundColor: Colors.grey[100],
                   child: Text(
-                    widget.session.email.isNotEmpty ? widget.session.email[0].toUpperCase() : 'C',
+                    widget.session.name.isNotEmpty ? widget.session.name[0].toUpperCase() : 'C',
                     style: const TextStyle(color: Color(0xFF0D1B3E), fontWeight: FontWeight.bold),
                   ),
                 ),
@@ -176,12 +218,13 @@ class _ClientHomeState extends State<ClientHome> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                widget.session.email,
-                style: const TextStyle(color: Color(0xFF0D1B3E), fontWeight: FontWeight.bold, fontSize: 18),
-                overflow: TextOverflow.ellipsis,
+              const Text(
+                'Service Dashboard',
+                style: TextStyle(color: Color(0xFF0D1B3E), fontWeight: FontWeight.w900, fontSize: 28),
               ),
-              const Text('Service Dashboard', style: TextStyle(color: Colors.grey, fontSize: 14)),
+              const SizedBox(height: 4),
+              Text('Welcome back to your support portal',
+                  style: TextStyle(color: Colors.grey[600], fontSize: 13, letterSpacing: 0.2)),
               const SizedBox(height: 24),
 
               // Stats
@@ -217,11 +260,14 @@ class _ClientHomeState extends State<ClientHome> {
                 height: 55,
                 child: ElevatedButton.icon(
                   onPressed: () async {
-                    await Navigator.push(
+                    final result = await Navigator.push(
                       context,
                       MaterialPageRoute(builder: (_) => const RaiseTicketPage()),
                     );
-                    _fetchTickets(); // refresh after raising a ticket
+                    _fetchTickets(); // refresh anyway
+                    if (result == true) {
+                      setState(() => _currentIndex = 1); // Redirect to Tickets tab
+                    }
                   },
                   icon: const Icon(Icons.add_circle_outline, size: 20),
                   label: const Text('Raise Ticket'),
@@ -252,7 +298,13 @@ class _ClientHomeState extends State<ClientHome> {
                   ),
                 )
               else
-                ..._tickets.take(3).map((t) => _buildRecentTicketCard(t)),
+                ..._tickets.take(3).map((t) => InkWell(
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => ClientTicketDetailsPage(ticket: t)),
+                      ),
+                      child: _buildRecentTicketCard(t),
+                    )),
             ],
           ),
         ),
@@ -282,7 +334,7 @@ class _ClientHomeState extends State<ClientHome> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4))],
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 10, offset: const Offset(0, 4))],
       ),
       child: Row(
         children: [
@@ -322,7 +374,7 @@ class _ClientHomeState extends State<ClientHome> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4))],
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 10, offset: const Offset(0, 4))],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

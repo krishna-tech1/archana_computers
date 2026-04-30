@@ -1,6 +1,9 @@
+import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:cookie_jar/cookie_jar.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/data_models.dart';
 
 class ApiService {
@@ -9,39 +12,78 @@ class ApiService {
 
   late final Dio _dio;
   late final CookieJar _cookieJar;
+  bool _isInitialized = false;
 
-  // ── Base URL ────────────────────────────────────────────────────────────
-  // 10.0.2.2 reaches the host machine's localhost from an Android emulator.
-  // For a physical device replace with your computer's local IP (e.g. 192.168.x.x).
-  static const String _baseUrl = 'https://archana-computers-ticketing-production.up.railway.app';
+  static const String _baseUrl = 'https://archana-computers.onrender.com';
+  static const String _sessionKey = 'user_session';
 
   ApiService._internal() {
-    _cookieJar = CookieJar();
-
-    _dio = Dio(BaseOptions(
-      baseUrl: _baseUrl,
-      connectTimeout: const Duration(seconds: 30),
-      receiveTimeout: const Duration(seconds: 30),
-      headers: {'Content-Type': 'application/json'},
-      // Do NOT follow redirects automatically – let us handle 401s.
-      validateStatus: (status) => status != null && status < 500,
-    ));
-
-    _dio.interceptors.add(CookieManager(_cookieJar));
-    _dio.interceptors.add(LogInterceptor(
-      responseBody: true,
-    ));
+    _dio = Dio(
+      BaseOptions(
+        baseUrl: _baseUrl,
+        connectTimeout: const Duration(seconds: 30),
+        receiveTimeout: const Duration(seconds: 30),
+        headers: {'Content-Type': 'application/json'},
+        validateStatus: (status) => status != null && status < 500,
+      ),
+    );
+    _dio.interceptors.add(LogInterceptor(responseBody: true));
   }
+
+  Future<void> init() async {
+    if (_isInitialized) return;
+    
+    final appDocDir = await getApplicationDocumentsDirectory();
+    final String path = '${appDocDir.path}/.cookies/';
+    _cookieJar = PersistCookieJar(storage: FileStorage(path));
+    _dio.interceptors.add(CookieManager(_cookieJar));
+    
+    _isInitialized = true;
+  }
+
+  // ── Session Persistence ──────────────────────────────────────────────────
+
+  Future<void> saveSession(UserSession session) async {
+    final prefs = await SharedPreferences.getInstance();
+    final sessionJson = jsonEncode({
+      'id': session.id,
+      'email': session.email,
+      'name': session.name,
+      'role': session.role,
+      'client_id': session.clientId,
+    });
+    await prefs.setString(_sessionKey, sessionJson);
+  }
+
+  Future<UserSession?> getSavedSession() async {
+    final prefs = await SharedPreferences.getInstance();
+    final sessionJson = prefs.getString(_sessionKey);
+    if (sessionJson == null) return null;
+    try {
+      final Map<String, dynamic> data = jsonDecode(sessionJson);
+      return UserSession.fromJson(data);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<void> clearSession() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_sessionKey);
+    await _cookieJar.deleteAll();
+  }
+
+  // ── Auth ─────────────────────────────────────────────────────────────────
 
   // ── Auth ─────────────────────────────────────────────────────────────────
 
   /// Returns UserSession on success.
   /// Throws [ApiException] on failure.
   Future<UserSession> login(String email, String password) async {
-    final res = await _dio.post('/api/login', data: {
-      'email': email.trim(),
-      'password': password,
-    });
+    final res = await _dio.post(
+      '/api/login',
+      data: {'email': email.trim(), 'password': password},
+    );
     if (res.statusCode == 200) {
       final user = res.data['user'] as Map<String, dynamic>;
       return UserSession.fromJson(user);
@@ -50,8 +92,10 @@ class ApiService {
   }
 
   Future<void> logout() async {
-    await _dio.post('/api/logout');
-    await _cookieJar.deleteAll();
+    try {
+      await _dio.post('/api/logout');
+    } catch (_) {}
+    await clearSession();
   }
 
   // ── Tickets ───────────────────────────────────────────────────────────────
@@ -65,7 +109,9 @@ class ApiService {
     );
     if (res.statusCode == 200) {
       final list = res.data['tickets'] as List<dynamic>? ?? [];
-      return list.map((e) => Ticket.fromJson(e as Map<String, dynamic>)).toList();
+      return list
+          .map((e) => Ticket.fromJson(e as Map<String, dynamic>))
+          .toList();
     }
     throw ApiException(_errorMessage(res));
   }
@@ -86,7 +132,7 @@ class ApiService {
 
     final res = await _dio.post('/api/tickets', data: body);
     if (res.statusCode == 201) {
-      return Ticket.fromJson(res.data['ticket'] as Map<String, dynamic>);
+      return Ticket.fromJson(res.data as Map<String, dynamic>);
     }
     throw ApiException(_errorMessage(res));
   }
@@ -108,7 +154,9 @@ class ApiService {
     final res = await _dio.get('/api/clients');
     if (res.statusCode == 200) {
       final list = res.data['clients'] as List<dynamic>? ?? [];
-      return list.map((e) => Client.fromJson(e as Map<String, dynamic>)).toList();
+      return list
+          .map((e) => Client.fromJson(e as Map<String, dynamic>))
+          .toList();
     }
     throw ApiException(_errorMessage(res));
   }

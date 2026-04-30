@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:dio/dio.dart';
 import '../models/data_models.dart';
 import '../services/api_service.dart';
+import 'client_details_page.dart';
 
 class ClientsListPage extends StatefulWidget {
   const ClientsListPage({super.key});
@@ -59,54 +59,16 @@ class _ClientsListPageState extends State<ClientsListPage> {
           c.email.toLowerCase().contains(_searchQuery))
       .toList();
 
-  void _showResetPasswordDialog(Client client) {
-    // Note: Backend does not currently expose a reset password endpoint in the README.
-    // This dialog shows a placeholder until that endpoint is available.
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Reset Password',
-            style: TextStyle(color: Color(0xFF0D1B3E), fontWeight: FontWeight.bold)),
-        content: Text(
-          'Reset password for ${client.name}?\n\nThis will call the reset password API when it becomes available.',
-          style: TextStyle(color: Colors.grey[600], fontSize: 13),
+  void _navigateToDetails(Client client) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ClientDetailsPage(
+          client: client,
         ),
-        actions: [
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: () => Navigator.of(ctx).pop(),
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide.none,
-                    backgroundColor: Colors.grey[200],
-                    foregroundColor: const Color(0xFF0D1B3E),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  ),
-                  child: const Text('Cancel'),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () => Navigator.of(ctx).pop(),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange[700],
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    elevation: 0,
-                  ),
-                  child: const Text('Reset'),
-                ),
-              ),
-            ],
-          ),
-        ],
       ),
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -177,74 +139,50 @@ class _ClientsListPageState extends State<ClientsListPage> {
   }
 
   Widget _buildClientCard(Client client) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4))],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(client.name,
-                        style: const TextStyle(
-                            color: Color(0xFF0D1B3E), fontWeight: FontWeight.bold, fontSize: 16)),
-                    const SizedBox(height: 4),
-                    Text(client.email, style: TextStyle(color: Colors.grey[600], fontSize: 13)),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          const Divider(height: 1, thickness: 1, color: Color(0xFFF0F0F0)),
-          const SizedBox(height: 12),
-
-          // Action buttons
-          Row(
-            children: [
-              Expanded(
-                child: _actionButton(
-                  icon: Icons.lock_reset,
-                  label: 'Reset Pwd',
-                  color: Colors.orange[700]!,
-                  onTap: () => _showResetPasswordDialog(client),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _actionButton({
-    required IconData icon,
-    required String label,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
+    return GestureDetector(
+      onTap: () => _navigateToDetails(client),
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        decoration: BoxDecoration(color: color.withOpacity(0.08), borderRadius: BorderRadius.circular(8)),
-        child: Column(
+        margin: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.02),
+              blurRadius: 15,
+              offset: const Offset(0, 8),
+            )
+          ],
+        ),
+        child: Row(
           children: [
-            Icon(icon, size: 18, color: color),
-            const SizedBox(height: 4),
-            Text(label, style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.w600)),
+            CircleAvatar(
+              backgroundColor: const Color(0xFF0D1B3E).withValues(alpha: 0.05),
+              radius: 24,
+              child: Text(
+                client.name.isNotEmpty ? client.name[0].toUpperCase() : 'C',
+                style: const TextStyle(color: Color(0xFF0D1B3E), fontWeight: FontWeight.bold),
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    client.name,
+                    style: const TextStyle(color: Color(0xFF0D1B3E), fontWeight: FontWeight.w800, fontSize: 16),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    client.email,
+                    style: TextStyle(color: Colors.grey[500], fontSize: 13, fontWeight: FontWeight.w500),
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Colors.grey[300]),
           ],
         ),
       ),
