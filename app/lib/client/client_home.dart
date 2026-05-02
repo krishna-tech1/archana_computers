@@ -214,6 +214,7 @@ class _ClientHomeState extends State<ClientHome> {
         appBar: AppBar(
           backgroundColor: Colors.white,
           elevation: 0,
+          automaticallyImplyLeading: false,
           title: const Text(
             'Archana Computers',
             style: TextStyle(

@@ -227,6 +227,7 @@ class _AdminHomeState extends State<AdminHome> {
         appBar: AppBar(
           backgroundColor: Colors.white,
           elevation: 0,
+          automaticallyImplyLeading: false,
           title: Text(
             _titles[_currentIndex],
             style: const TextStyle(

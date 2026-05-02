@@ -31,9 +31,17 @@ class _ProductViewPageState extends State<ProductViewPage> {
         _isLoading = false;
       });
     } catch (e) {
-      setState(() => _isLoading = false);
-      // We don't necessarily want to show a snackbar here if it's just "not authenticated"
-      // but for debugging purposes or if it's a real error, we might.
+      if (mounted) {
+        setState(() => _isLoading = false);
+        // If it's a 401, it's because the backend requires login even to see products.
+        final errorMsg = e.toString().contains('401') 
+          ? 'Please login to view products (Backend Requirement)'
+          : 'Error fetching products: $e';
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(errorMsg), behavior: SnackBarBehavior.floating),
+        );
+      }
       debugPrint('Error fetching products: $e');
     }
   }
@@ -74,43 +82,47 @@ class _ProductViewPageState extends State<ProductViewPage> {
       ),
       body: RefreshIndicator(
         onRefresh: _fetchProducts,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildHeader(),
-            Expanded(
-              child: _isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : _products.isEmpty
-                      ? Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.inventory_2_outlined, size: 64, color: Colors.grey[400]),
-                              const SizedBox(height: 16),
-                              Text(
-                                'No products available',
-                                style: TextStyle(color: Colors.grey[600], fontSize: 16),
-                              ),
-                            ],
-                          ),
-                        )
-                      : GridView.builder(
-                          padding: const EdgeInsets.all(16),
-                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            childAspectRatio: 0.8,
-                            crossAxisSpacing: 16,
-                            mainAxisSpacing: 16,
-                          ),
-                          itemCount: _products.length,
-                          itemBuilder: (context, index) {
-                            return _buildProductCard(_products[index]);
-                          },
+        child: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : CustomScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                slivers: [
+                  SliverToBoxAdapter(child: _buildHeader()),
+                  if (_products.isEmpty)
+                    SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.inventory_2_outlined, size: 64, color: Colors.grey[400]),
+                            const SizedBox(height: 16),
+                            Text(
+                              'No products available',
+                              style: TextStyle(color: Colors.grey[600], fontSize: 16),
+                            ),
+                          ],
                         ),
-            ),
-          ],
-        ),
+                      ),
+                    )
+                  else
+                    SliverPadding(
+                      padding: const EdgeInsets.all(16),
+                      sliver: SliverGrid(
+                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          childAspectRatio: 0.8,
+                          crossAxisSpacing: 16,
+                          mainAxisSpacing: 16,
+                        ),
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) => _buildProductCard(_products[index]),
+                          childCount: _products.length,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
       ),
     );
   }

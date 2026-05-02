@@ -62,5 +62,5 @@ func RegisterRoutes(app *fiber.App, deps handlers.Deps) {
 		deps.Sessions.RequireRole(sqlc.UserRoleAdmin),
 		productHandler.DeleteProduct,
 	)
-	api.Get("/products", deps.Sessions.RequireAuth(), productHandler.ListProducts)
+	api.Get("/products", productHandler.ListProducts)
 }

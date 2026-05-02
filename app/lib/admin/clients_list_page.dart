@@ -200,32 +200,6 @@ class _ClientsListPageState extends State<ClientsListPage> {
                     }
                   },
                 ),
-                IconButton(
-                  icon: const Icon(Icons.delete_outline, size: 20, color: Colors.redAccent),
-                  onPressed: () {
-                    // Show confirmation and delete
-                    showDialog(
-                      context: context,
-                      builder: (ctx) => AlertDialog(
-                        title: const Text('Delete Client'),
-                        content: Text('Are you sure you want to delete ${client.name}?'),
-                        actions: [
-                          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-                          TextButton(
-                            onPressed: () {
-                              Navigator.pop(ctx);
-                              // Mock delete
-                              setState(() {
-                                _clients.removeWhere((c) => c.id == client.id);
-                              });
-                            },
-                            child: const Text('Delete', style: TextStyle(color: Colors.red)),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
               ],
             ),
             Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Colors.grey[300]),
