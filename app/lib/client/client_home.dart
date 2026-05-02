@@ -3,7 +3,8 @@ import 'package:dio/dio.dart';
 import '../widgets/double_back_exit.dart';
 import '../models/data_models.dart';
 import '../services/api_service.dart';
-import '../login_page.dart';
+
+import '../product_view_page.dart';
 import 'client_tickets_page.dart';
 import 'raise_ticket_page.dart';
 import 'client_ticket_details_page.dart';
@@ -44,7 +45,11 @@ class _ClientHomeState extends State<ClientHome> {
   void _showError(String msg) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg), backgroundColor: Colors.red[700], behavior: SnackBarBehavior.floating),
+      SnackBar(
+        content: Text(msg),
+        backgroundColor: Colors.red[700],
+        behavior: SnackBarBehavior.floating,
+      ),
     );
   }
 
@@ -63,7 +68,9 @@ class _ClientHomeState extends State<ClientHome> {
             child: Dialog(
               alignment: Alignment.topRight,
               insetPadding: const EdgeInsets.only(top: 60, right: 16),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
               elevation: 20,
               shadowColor: Colors.black26,
               child: Container(
@@ -76,7 +83,11 @@ class _ClientHomeState extends State<ClientHome> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     const SizedBox(height: 24),
-                    const Icon(Icons.account_circle_outlined, size: 40, color: Color(0xFF0D1B3E)),
+                    const Icon(
+                      Icons.account_circle_outlined,
+                      size: 40,
+                      color: Color(0xFF0D1B3E),
+                    ),
                     const SizedBox(height: 12),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -99,26 +110,46 @@ class _ClientHomeState extends State<ClientHome> {
                         showDialog(
                           context: ctx,
                           builder: (confirmCtx) => AlertDialog(
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                            title: const Text('Logout', style: TextStyle(fontWeight: FontWeight.bold)),
-                            content: const Text('Are you sure you want to log out?'),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            title: const Text(
+                              'Logout',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            content: const Text(
+                              'Are you sure you want to log out?',
+                            ),
                             actions: [
                               TextButton(
                                 onPressed: () => Navigator.pop(confirmCtx),
-                                child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+                                child: const Text(
+                                  'Cancel',
+                                  style: TextStyle(color: Colors.grey),
+                                ),
                               ),
                               TextButton(
                                 onPressed: () async {
-                                  Navigator.pop(confirmCtx); // Close confirm dialog
+                                  Navigator.pop(
+                                    confirmCtx,
+                                  ); // Close confirm dialog
                                   Navigator.of(ctx).pop(); // Close popup
                                   await ApiService().logout();
                                   if (!mounted) return;
                                   Navigator.of(context).pushAndRemoveUntil(
-                                    MaterialPageRoute(builder: (_) => const LoginPage()),
+                                    MaterialPageRoute(
+                                      builder: (_) => const ProductViewPage(),
+                                    ),
                                     (route) => false,
                                   );
                                 },
-                                child: const Text('Logout', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                                child: const Text(
+                                  'Logout',
+                                  style: TextStyle(
+                                    color: Colors.red,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                               ),
                             ],
                           ),
@@ -141,11 +172,19 @@ class _ClientHomeState extends State<ClientHome> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.logout_rounded, size: 16, color: Colors.red[700]),
+                            Icon(
+                              Icons.logout_rounded,
+                              size: 16,
+                              color: Colors.red[700],
+                            ),
                             const SizedBox(width: 8),
                             Text(
                               'Logout',
-                              style: TextStyle(color: Colors.red[700], fontWeight: FontWeight.w800, fontSize: 13),
+                              style: TextStyle(
+                                color: Colors.red[700],
+                                fontWeight: FontWeight.w800,
+                                fontSize: 13,
+                              ),
                             ),
                           ],
                         ),
@@ -161,8 +200,11 @@ class _ClientHomeState extends State<ClientHome> {
     );
   }
 
-  int get _activeCount => _tickets.where((t) => t.status == 'new' || t.status == 'processing').length;
-  int get _completedCount => _tickets.where((t) => t.status == 'completed').length;
+  int get _activeCount => _tickets
+      .where((t) => t.status == 'new' || t.status == 'processing')
+      .length;
+  int get _completedCount =>
+      _tickets.where((t) => t.status == 'completed').length;
 
   @override
   Widget build(BuildContext context) {
@@ -174,7 +216,11 @@ class _ClientHomeState extends State<ClientHome> {
           elevation: 0,
           title: const Text(
             'Archana Computers',
-            style: TextStyle(color: Color(0xFF0D1B3E), fontWeight: FontWeight.bold, fontSize: 18),
+            style: TextStyle(
+              color: Color(0xFF0D1B3E),
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+            ),
           ),
           actions: [
             Padding(
@@ -184,15 +230,22 @@ class _ClientHomeState extends State<ClientHome> {
                 child: CircleAvatar(
                   backgroundColor: Colors.grey[100],
                   child: Text(
-                    widget.session.name.isNotEmpty ? widget.session.name[0].toUpperCase() : 'C',
-                    style: const TextStyle(color: Color(0xFF0D1B3E), fontWeight: FontWeight.bold),
+                    widget.session.name.isNotEmpty
+                        ? widget.session.name[0].toUpperCase()
+                        : 'C',
+                    style: const TextStyle(
+                      color: Color(0xFF0D1B3E),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
             ),
           ],
         ),
-        body: _currentIndex == 0 ? _buildHomeContent() : ClientTicketsPage(tickets: _tickets, onRefresh: _fetchTickets),
+        body: _currentIndex == 0
+            ? _buildHomeContent()
+            : ClientTicketsPage(tickets: _tickets, onRefresh: _fetchTickets),
         bottomNavigationBar: BottomNavigationBar(
           currentIndex: _currentIndex,
           onTap: (i) => setState(() => _currentIndex = i),
@@ -201,7 +254,10 @@ class _ClientHomeState extends State<ClientHome> {
           unselectedItemColor: Colors.grey,
           items: const [
             BottomNavigationBarItem(icon: Icon(Icons.grid_view), label: 'Home'),
-            BottomNavigationBarItem(icon: Icon(Icons.confirmation_number_outlined), label: 'Tickets'),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.confirmation_number_outlined),
+              label: 'Tickets',
+            ),
           ],
         ),
       ),
@@ -220,11 +276,21 @@ class _ClientHomeState extends State<ClientHome> {
             children: [
               const Text(
                 'Service Dashboard',
-                style: TextStyle(color: Color(0xFF0D1B3E), fontWeight: FontWeight.w900, fontSize: 28),
+                style: TextStyle(
+                  color: Color(0xFF0D1B3E),
+                  fontWeight: FontWeight.w900,
+                  fontSize: 28,
+                ),
               ),
               const SizedBox(height: 4),
-              Text('Welcome back to your support portal',
-                  style: TextStyle(color: Colors.grey[600], fontSize: 13, letterSpacing: 0.2)),
+              Text(
+                'Welcome back to your support portal',
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontSize: 13,
+                  letterSpacing: 0.2,
+                ),
+              ),
               const SizedBox(height: 24),
 
               // Stats
@@ -262,11 +328,15 @@ class _ClientHomeState extends State<ClientHome> {
                   onPressed: () async {
                     final result = await Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (_) => const RaiseTicketPage()),
+                      MaterialPageRoute(
+                        builder: (_) => const RaiseTicketPage(),
+                      ),
                     );
                     _fetchTickets(); // refresh anyway
                     if (result == true) {
-                      setState(() => _currentIndex = 1); // Redirect to Tickets tab
+                      setState(
+                        () => _currentIndex = 1,
+                      ); // Redirect to Tickets tab
                     }
                   },
                   icon: const Icon(Icons.add_circle_outline, size: 20),
@@ -274,7 +344,9 @@ class _ClientHomeState extends State<ClientHome> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF0D1B3E),
                     foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
                 ),
               ),
@@ -282,29 +354,49 @@ class _ClientHomeState extends State<ClientHome> {
 
               const Text(
                 'Recent Tickets',
-                style: TextStyle(color: Color(0xFF0D1B3E), fontWeight: FontWeight.bold, fontSize: 18),
+                style: TextStyle(
+                  color: Color(0xFF0D1B3E),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
               ),
               const SizedBox(height: 12),
               if (_isLoading)
-                const Center(child: Padding(padding: EdgeInsets.all(24), child: CircularProgressIndicator()))
+                const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(24),
+                    child: CircularProgressIndicator(),
+                  ),
+                )
               else if (_tickets.isEmpty)
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                   child: Center(
-                    child: Text('Your ticket updates will appear here.',
-                        style: TextStyle(color: Colors.grey[600], fontSize: 14)),
+                    child: Text(
+                      'Your ticket updates will appear here.',
+                      style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                    ),
                   ),
                 )
               else
-                ..._tickets.take(3).map((t) => InkWell(
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => ClientTicketDetailsPage(ticket: t)),
+                ..._tickets
+                    .take(3)
+                    .map(
+                      (t) => InkWell(
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => ClientTicketDetailsPage(ticket: t),
+                          ),
+                        ),
+                        child: _buildRecentTicketCard(t),
                       ),
-                      child: _buildRecentTicketCard(t),
-                    )),
+                    ),
             ],
           ),
         ),
@@ -334,7 +426,13 @@ class _ClientHomeState extends State<ClientHome> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 10, offset: const Offset(0, 4))],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Row(
         children: [
@@ -342,20 +440,38 @@ class _ClientHomeState extends State<ClientHome> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(ticket.title,
-                    style: const TextStyle(color: Color(0xFF0D1B3E), fontWeight: FontWeight.bold, fontSize: 14),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis),
+                Text(
+                  ticket.title,
+                  style: const TextStyle(
+                    color: Color(0xFF0D1B3E),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
                 const SizedBox(height: 4),
-                Text(ticket.type, style: TextStyle(color: Colors.grey[500], fontSize: 12)),
+                Text(
+                  ticket.type,
+                  style: TextStyle(color: Colors.grey[500], fontSize: 12),
+                ),
               ],
             ),
           ),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(color: statusBg, borderRadius: BorderRadius.circular(12)),
-            child: Text(ticket.statusLabel,
-                style: TextStyle(color: statusColor, fontSize: 11, fontWeight: FontWeight.bold)),
+            decoration: BoxDecoration(
+              color: statusBg,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              ticket.statusLabel,
+              style: TextStyle(
+                color: statusColor,
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ],
       ),
@@ -374,19 +490,34 @@ class _ClientHomeState extends State<ClientHome> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 10, offset: const Offset(0, 4))],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
             padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(color: iconBg, borderRadius: BorderRadius.circular(8)),
+            decoration: BoxDecoration(
+              color: iconBg,
+              borderRadius: BorderRadius.circular(8),
+            ),
             child: Icon(icon, color: iconColor, size: 24),
           ),
           const SizedBox(height: 16),
-          Text(value,
-              style: const TextStyle(color: Color(0xFF0D1B3E), fontWeight: FontWeight.bold, fontSize: 28)),
+          Text(
+            value,
+            style: const TextStyle(
+              color: Color(0xFF0D1B3E),
+              fontWeight: FontWeight.bold,
+              fontSize: 28,
+            ),
+          ),
           Text(label, style: TextStyle(color: Colors.grey[600], fontSize: 13)),
         ],
       ),

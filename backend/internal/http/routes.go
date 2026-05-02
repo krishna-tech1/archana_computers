@@ -9,6 +9,7 @@ import (
 func RegisterRoutes(app *fiber.App, deps handlers.Deps) {
 	authHandler := handlers.NewAuthHandler(deps)
 	clientHandler := handlers.NewClientHandler(deps)
+	productHandler := handlers.NewProductHandler(deps)
 	ticketHandler := handlers.NewTicketHandler(deps)
 
 	api := app.Group("/api")
@@ -20,6 +21,18 @@ func RegisterRoutes(app *fiber.App, deps handlers.Deps) {
 		deps.Sessions.RequireAuth(),
 		deps.Sessions.RequireRole(sqlc.UserRoleAdmin),
 		clientHandler.CreateClient,
+	)
+	api.Put(
+		"/clients/:clientId",
+		deps.Sessions.RequireAuth(),
+		deps.Sessions.RequireRole(sqlc.UserRoleAdmin),
+		clientHandler.UpdateClient,
+	)
+	api.Patch(
+		"/clients/:clientId/reset-password",
+		deps.Sessions.RequireAuth(),
+		deps.Sessions.RequireRole(sqlc.UserRoleAdmin),
+		clientHandler.ResetClientPassword,
 	)
 	api.Get(
 		"/clients",
@@ -36,4 +49,18 @@ func RegisterRoutes(app *fiber.App, deps handlers.Deps) {
 		deps.Sessions.RequireRole(sqlc.UserRoleAdmin),
 		ticketHandler.UpdateTicketStatus,
 	)
+
+	api.Put(
+		"/products",
+		deps.Sessions.RequireAuth(),
+		deps.Sessions.RequireRole(sqlc.UserRoleAdmin),
+		productHandler.AddProduct,
+	)
+	api.Delete(
+		"/products/:productId",
+		deps.Sessions.RequireAuth(),
+		deps.Sessions.RequireRole(sqlc.UserRoleAdmin),
+		productHandler.DeleteProduct,
+	)
+	api.Get("/products", deps.Sessions.RequireAuth(), productHandler.ListProducts)
 }

@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:dio/dio.dart';
 import '../services/api_service.dart';
+import '../models/data_models.dart';
 
 class AddClientPage extends StatefulWidget {
-  const AddClientPage({super.key});
+  final Client? client;
+  const AddClientPage({super.key, this.client});
 
   @override
   State<AddClientPage> createState() => _AddClientPageState();
@@ -17,6 +19,19 @@ class _AddClientPageState extends State<AddClientPage> {
   final _phoneController = TextEditingController();
   final _addressController = TextEditingController();
   bool _isLoading = false;
+
+  bool get _isEditing => widget.client != null;
+
+  @override
+  void initState() {
+    super.initState();
+    if (_isEditing) {
+      _nameController.text = widget.client!.name;
+      _emailController.text = widget.client!.email;
+      _phoneController.text = widget.client!.phone;
+      _addressController.text = widget.client!.address;
+    }
+  }
 
   @override
   void dispose() {
@@ -31,14 +46,29 @@ class _AddClientPageState extends State<AddClientPage> {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isLoading = true);
     try {
-      final password = await ApiService().createClient(
-        name: _nameController.text.trim(),
-        email: _emailController.text.trim(),
-        phone: _phoneController.text.trim(),
-        address: _addressController.text.trim(),
-      );
-      if (!mounted) return;
-      _showPasswordDialog(password);
+      if (_isEditing) {
+        await ApiService().updateClient(
+          id: widget.client!.id,
+          name: _nameController.text.trim(),
+          email: _emailController.text.trim(),
+          phone: _phoneController.text.trim(),
+          address: _addressController.text.trim(),
+        );
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Client updated successfully!'), behavior: SnackBarBehavior.floating),
+        );
+        Navigator.pop(context, true);
+      } else {
+        final password = await ApiService().createClient(
+          name: _nameController.text.trim(),
+          email: _emailController.text.trim(),
+          phone: _phoneController.text.trim(),
+          address: _addressController.text.trim(),
+        );
+        if (!mounted) return;
+        _showPasswordDialog(password);
+      }
     } on ApiException catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -136,7 +166,7 @@ class _AddClientPageState extends State<AddClientPage> {
             child: ElevatedButton(
               onPressed: () {
                 Navigator.of(ctx).pop();
-                Navigator.of(context).pop(); // back to clients list
+                Navigator.of(context).pop(true); // back to clients list with refresh
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF0D1B3E),
@@ -163,8 +193,8 @@ class _AddClientPageState extends State<AddClientPage> {
           onPressed: () => Navigator.pop(context),
           icon: const Icon(Icons.arrow_back_ios_new, color: Color(0xFF0D1B3E), size: 20),
         ),
-        title: const Text('Add New Client',
-            style: TextStyle(color: Color(0xFF0D1B3E), fontWeight: FontWeight.bold, fontSize: 18)),
+        title: Text(_isEditing ? 'Edit Client' : 'Add New Client',
+            style: const TextStyle(color: Color(0xFF0D1B3E), fontWeight: FontWeight.bold, fontSize: 18)),
       ),
       body: Form(
         key: _formKey,
@@ -173,10 +203,10 @@ class _AddClientPageState extends State<AddClientPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('New Client',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF0D1B3E))),
+              Text(_isEditing ? 'Edit Information' : 'New Client',
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF0D1B3E))),
               const SizedBox(height: 8),
-              Text('Enter the details of the new client to add them to your database.',
+              Text(_isEditing ? 'Update the details for this client profile.' : 'Enter the details of the new client to add them to your database.',
                   style: TextStyle(color: Colors.grey[600], fontSize: 14)),
               const SizedBox(height: 32),
 
@@ -285,7 +315,7 @@ class _AddClientPageState extends State<AddClientPage> {
                           height: 18,
                           child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                       : const Icon(Icons.check_circle_outline, size: 20),
-                  label: Text(_isLoading ? 'Creating...' : 'Save Client'),
+                  label: Text(_isLoading ? (_isEditing ? 'Updating...' : 'Creating...') : (_isEditing ? 'Update Client' : 'Save Client')),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF0D1B3E),
                     foregroundColor: Colors.white,

@@ -103,3 +103,30 @@ class Ticket {
     }
   }
 }
+
+// ─── Product ──────────────────────────────────────────────────────────────
+class Product {
+  final String id;
+  final String name;
+  final double cost;
+  final String createdAt;
+  final String updatedAt;
+
+  Product({
+    required this.id,
+    required this.name,
+    required this.cost,
+    this.createdAt = '',
+    this.updatedAt = '',
+  });
+
+  factory Product.fromJson(Map<String, dynamic> json) {
+    return Product(
+      id: json['id'] ?? '',
+      name: json['name'] ?? '',
+      cost: (json['cost'] ?? 0).toDouble(),
+      createdAt: json['created_at'] ?? '',
+      updatedAt: json['updated_at'] ?? '',
+    );
+  }
+}

@@ -207,6 +207,7 @@ class _RaiseTicketPageState extends State<RaiseTicketPage> {
                     enabled: !_isLoading,
                     style: const TextStyle(fontWeight: FontWeight.w600, color: Color(0xFF0D1B3E)),
                     decoration: _inputDecoration('Briefly describe the problem'),
+                    maxLength: 50,
                   ),
                   const SizedBox(height: 24),
 
@@ -233,6 +234,7 @@ class _RaiseTicketPageState extends State<RaiseTicketPage> {
                     enabled: !_isLoading,
                     style: const TextStyle(fontWeight: FontWeight.w500, color: Color(0xFF0D1B3E)),
                     decoration: _inputDecoration('Provide more details...'),
+                    maxLength: 500,
                   ),
                   const SizedBox(height: 32),
 

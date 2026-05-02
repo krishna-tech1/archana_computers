@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import '../models/data_models.dart';
 import '../widgets/double_back_exit.dart';
-import '../login_page.dart';
+
 import '../services/api_service.dart';
 import 'add_client_page.dart';
 import 'clients_list_page.dart';
 import 'tickets_list_page.dart';
 import 'ticket_details_page.dart';
+import 'product_admin_page.dart';
+import '../product_view_page.dart';
 
 class AdminHome extends StatefulWidget {
   final UserSession session;
@@ -25,7 +27,11 @@ class _AdminHomeState extends State<AdminHome> {
   int _clientCount = 0;
   bool _isLoading = true;
 
-  final List<String> _titles = ['Archana Computers', 'Client Directory', 'Ticket Management'];
+  final List<String> _titles = [
+    'Archana Computers',
+    'Client Directory',
+    'Ticket Management',
+  ];
 
   @override
   void initState() {
@@ -58,7 +64,11 @@ class _AdminHomeState extends State<AdminHome> {
   void _showError(String msg) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg), backgroundColor: Colors.red[700], behavior: SnackBarBehavior.floating),
+      SnackBar(
+        content: Text(msg),
+        backgroundColor: Colors.red[700],
+        behavior: SnackBarBehavior.floating,
+      ),
     );
   }
 
@@ -77,7 +87,9 @@ class _AdminHomeState extends State<AdminHome> {
             child: Dialog(
               alignment: Alignment.topRight,
               insetPadding: const EdgeInsets.only(top: 60, right: 16),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
               elevation: 20,
               shadowColor: Colors.black26,
               child: Container(
@@ -90,7 +102,11 @@ class _AdminHomeState extends State<AdminHome> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     const SizedBox(height: 24),
-                    const Icon(Icons.account_circle_outlined, size: 40, color: Color(0xFF0D1B3E)),
+                    const Icon(
+                      Icons.account_circle_outlined,
+                      size: 40,
+                      color: Color(0xFF0D1B3E),
+                    ),
                     const SizedBox(height: 12),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -113,26 +129,46 @@ class _AdminHomeState extends State<AdminHome> {
                         showDialog(
                           context: ctx,
                           builder: (confirmCtx) => AlertDialog(
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                            title: const Text('Logout', style: TextStyle(fontWeight: FontWeight.bold)),
-                            content: const Text('Are you sure you want to log out?'),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            title: const Text(
+                              'Logout',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            content: const Text(
+                              'Are you sure you want to log out?',
+                            ),
                             actions: [
                               TextButton(
                                 onPressed: () => Navigator.pop(confirmCtx),
-                                child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+                                child: const Text(
+                                  'Cancel',
+                                  style: TextStyle(color: Colors.grey),
+                                ),
                               ),
                               TextButton(
                                 onPressed: () async {
-                                  Navigator.pop(confirmCtx); // Close confirm dialog
+                                  Navigator.pop(
+                                    confirmCtx,
+                                  ); // Close confirm dialog
                                   Navigator.of(ctx).pop(); // Close popup
                                   await ApiService().logout();
                                   if (!mounted) return;
                                   Navigator.of(context).pushAndRemoveUntil(
-                                    MaterialPageRoute(builder: (_) => const LoginPage()),
+                                    MaterialPageRoute(
+                                      builder: (_) => const ProductViewPage(),
+                                    ),
                                     (route) => false,
                                   );
                                 },
-                                child: const Text('Logout', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                                child: const Text(
+                                  'Logout',
+                                  style: TextStyle(
+                                    color: Colors.red,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                               ),
                             ],
                           ),
@@ -155,11 +191,19 @@ class _AdminHomeState extends State<AdminHome> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.logout_rounded, size: 16, color: Colors.red[700]),
+                            Icon(
+                              Icons.logout_rounded,
+                              size: 16,
+                              color: Colors.red[700],
+                            ),
                             const SizedBox(width: 8),
                             Text(
                               'Logout',
-                              style: TextStyle(color: Colors.red[700], fontWeight: FontWeight.w800, fontSize: 13),
+                              style: TextStyle(
+                                color: Colors.red[700],
+                                fontWeight: FontWeight.w800,
+                                fontSize: 13,
+                              ),
                             ),
                           ],
                         ),
@@ -185,7 +229,11 @@ class _AdminHomeState extends State<AdminHome> {
           elevation: 0,
           title: Text(
             _titles[_currentIndex],
-            style: const TextStyle(color: Color(0xFF0D1B3E), fontWeight: FontWeight.bold, fontSize: 18),
+            style: const TextStyle(
+              color: Color(0xFF0D1B3E),
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+            ),
           ),
           actions: [
             Padding(
@@ -195,8 +243,13 @@ class _AdminHomeState extends State<AdminHome> {
                 child: CircleAvatar(
                   backgroundColor: Colors.grey[100],
                   child: Text(
-                    widget.session.email.isNotEmpty ? widget.session.email[0].toUpperCase() : 'A',
-                    style: const TextStyle(color: Color(0xFF0D1B3E), fontWeight: FontWeight.bold),
+                    widget.session.email.isNotEmpty
+                        ? widget.session.email[0].toUpperCase()
+                        : 'A',
+                    style: const TextStyle(
+                      color: Color(0xFF0D1B3E),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
@@ -209,7 +262,9 @@ class _AdminHomeState extends State<AdminHome> {
             ? FloatingActionButton(
                 onPressed: () async {
                   await Navigator.push(
-                      context, MaterialPageRoute(builder: (_) => const AddClientPage()));
+                    context,
+                    MaterialPageRoute(builder: (_) => const AddClientPage()),
+                  );
                   // Refresh home data after adding client
                   _loadHomeData();
                 },
@@ -227,7 +282,10 @@ class _AdminHomeState extends State<AdminHome> {
           items: const [
             BottomNavigationBarItem(icon: Icon(Icons.grid_view), label: 'Home'),
             BottomNavigationBarItem(icon: Icon(Icons.people), label: 'Clients'),
-            BottomNavigationBarItem(icon: Icon(Icons.confirmation_number), label: 'Tickets'),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.confirmation_number),
+              label: 'Tickets',
+            ),
           ],
         ),
       ),
@@ -257,29 +315,45 @@ class _AdminHomeState extends State<AdminHome> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Welcome back', style: TextStyle(color: Colors.grey, fontSize: 14)),
-              const Text('System Overview',
-                  style: TextStyle(color: Color(0xFF0D1B3E), fontWeight: FontWeight.bold, fontSize: 20)),
+              const Text(
+                'Welcome back',
+                style: TextStyle(color: Colors.grey, fontSize: 14),
+              ),
+              const Text(
+                'System Overview',
+                style: TextStyle(
+                  color: Color(0xFF0D1B3E),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                ),
+              ),
               const SizedBox(height: 24),
 
               _isLoading
-                  ? const Center(child: Padding(padding: EdgeInsets.all(32), child: CircularProgressIndicator()))
+                  ? const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(32),
+                        child: CircularProgressIndicator(),
+                      ),
+                    )
                   : Row(
                       children: [
                         Expanded(
                           child: _buildStatCard(
-                              icon: Icons.confirmation_number_outlined,
-                              iconColor: Colors.green,
-                              label: 'New Tickets',
-                              value: newCount.toString()),
+                            icon: Icons.confirmation_number_outlined,
+                            iconColor: Colors.green,
+                            label: 'New Tickets',
+                            value: newCount.toString(),
+                          ),
                         ),
                         const SizedBox(width: 16),
                         Expanded(
                           child: _buildStatCard(
-                              icon: Icons.people_outline,
-                              iconColor: Colors.blue,
-                              label: 'Total Clients',
-                              value: _clientCount.toString()),
+                            icon: Icons.people_outline,
+                            iconColor: Colors.blue,
+                            label: 'Total Clients',
+                            value: _clientCount.toString(),
+                          ),
                         ),
                       ],
                     ),
@@ -287,16 +361,29 @@ class _AdminHomeState extends State<AdminHome> {
 
               SizedBox(
                 width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: () => setState(() => _currentIndex = 1),
-                  icon: const Icon(Icons.people_outline, color: Colors.white),
-                  label: const Text('Manage Clients'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF0D1B3E),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: _buildActionCard(
+                        icon: Icons.people_outline,
+                        label: 'Manage Clients',
+                        onTap: () => setState(() => _currentIndex = 1),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: _buildActionCard(
+                        icon: Icons.inventory_2_outlined,
+                        label: 'Manage Products',
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const ProductAdminPage(),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: 32),
@@ -304,25 +391,44 @@ class _AdminHomeState extends State<AdminHome> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Recent Tickets',
-                      style: TextStyle(color: Color(0xFF0D1B3E), fontWeight: FontWeight.bold, fontSize: 18)),
+                  const Text(
+                    'Recent Tickets',
+                    style: TextStyle(
+                      color: Color(0xFF0D1B3E),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
                   TextButton(
                     onPressed: () => setState(() => _currentIndex = 2),
-                    child: const Text('View all', style: TextStyle(color: Colors.grey)),
+                    child: const Text(
+                      'View all',
+                      style: TextStyle(color: Colors.grey),
+                    ),
                   ),
                 ],
               ),
               const SizedBox(height: 8),
 
               if (_isLoading)
-                const Center(child: Padding(padding: EdgeInsets.all(24), child: CircularProgressIndicator()))
+                const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(24),
+                    child: CircularProgressIndicator(),
+                  ),
+                )
               else if (_recentTickets.isEmpty)
                 Container(
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                      color: Colors.white, borderRadius: BorderRadius.circular(12)),
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                   child: Center(
-                    child: Text('No tickets yet.', style: TextStyle(color: Colors.grey[500], fontSize: 14)),
+                    child: Text(
+                      'No tickets yet.',
+                      style: TextStyle(color: Colors.grey[500], fontSize: 14),
+                    ),
                   ),
                 )
               else
@@ -345,22 +451,77 @@ class _AdminHomeState extends State<AdminHome> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 10, offset: const Offset(0, 4))],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
             padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(color: iconColor.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
+            decoration: BoxDecoration(
+              color: iconColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
             child: Icon(icon, color: iconColor, size: 24),
           ),
           const SizedBox(height: 12),
           Text(label, style: const TextStyle(color: Colors.grey, fontSize: 12)),
           const SizedBox(height: 4),
-          Text(value,
-              style: const TextStyle(color: Color(0xFF0D1B3E), fontWeight: FontWeight.bold, fontSize: 24)),
+          Text(
+            value,
+            style: const TextStyle(
+              color: Color(0xFF0D1B3E),
+              fontWeight: FontWeight.bold,
+              fontSize: 24,
+            ),
+          ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildActionCard({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 12),
+        decoration: BoxDecoration(
+          color: const Color(0xFF0D1B3E),
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF0D1B3E).withValues(alpha: 0.3),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            Icon(icon, color: Colors.white, size: 28),
+            const SizedBox(height: 12),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 13,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -401,7 +562,7 @@ class _AdminHomeState extends State<AdminHome> {
               color: Colors.black.withValues(alpha: 0.03),
               blurRadius: 15,
               offset: const Offset(0, 8),
-            )
+            ),
           ],
           border: Border.all(color: Colors.grey.shade50),
         ),
@@ -412,7 +573,10 @@ class _AdminHomeState extends State<AdminHome> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.grey.shade50,
                     borderRadius: BorderRadius.circular(6),
@@ -428,11 +592,16 @@ class _AdminHomeState extends State<AdminHome> {
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: statusBg,
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: statusColor.withValues(alpha: 0.1)),
+                    border: Border.all(
+                      color: statusColor.withValues(alpha: 0.1),
+                    ),
                   ),
                   child: Text(
                     ticket.statusLabel.toUpperCase(),

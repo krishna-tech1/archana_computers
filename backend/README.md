@@ -173,6 +173,102 @@ Returns a list of all registered clients.
 
 ---
 
+### PUT `/api/clients/:clientId`
+
+Updates a client profile. Requires **admin** role and full payload.
+
+**Path Parameters**
+
+| Parameter | Type   | Description              |
+| --------- | ------ | ------------------------ |
+| clientId  | string | ID of the client to edit |
+
+**Request Headers**
+
+| Header       | Value                |
+| ------------ | -------------------- |
+| Content-Type | application/json     |
+| Cookie       | Admin session cookie |
+
+**Request Body**
+
+```json
+{
+    "name": "string",
+    "email": "string",
+    "phone": "string",
+    "address": "string"
+}
+```
+
+| Field   | Type   | Required | Description                |
+| ------- | ------ | -------- | -------------------------- |
+| name    | string | Yes      | Full name of the client    |
+| email   | string | Yes      | Login email for the client |
+| phone   | string | Yes      | Phone number               |
+| address | string | Yes      | Client address             |
+
+**Response** `200 OK`
+
+```json
+{
+    "id": "string",
+    "user_id": "string",
+    "name": "string",
+    "email": "string",
+    "phone": "string",
+    "address": "string",
+    "created_at": "string",
+    "updated_at": "string"
+}
+```
+
+**Error Responses**
+
+| Status | Meaning                         |
+| ------ | ------------------------------- |
+| 400    | Missing or invalid fields       |
+| 401    | Not authenticated               |
+| 403    | Authenticated user is not admin |
+| 404    | Client not found                |
+| 409    | Email already in use            |
+
+---
+
+### PATCH `/api/clients/:clientId/reset-password`
+
+Resets the client's password and returns the new one. Requires **admin** role.
+
+**Path Parameters**
+
+| Parameter | Type   | Description                |
+| --------- | ------ | -------------------------- |
+| clientId  | string | ID of the client to update |
+
+**Request Headers**
+
+| Header | Value                |
+| ------ | -------------------- |
+| Cookie | Admin session cookie |
+
+**Response** `200 OK`
+
+```json
+{
+    "password": "string"
+}
+```
+
+**Error Responses**
+
+| Status | Meaning                         |
+| ------ | ------------------------------- |
+| 401    | Not authenticated               |
+| 403    | Authenticated user is not admin |
+| 404    | Client not found                |
+
+---
+
 ## Tickets
 
 ### POST `/api/tickets`
@@ -343,3 +439,125 @@ Updates the status of a ticket. Requires **admin** role.
 | 401    | Not authenticated               |
 | 403    | Authenticated user is not admin |
 | 404    | Ticket not found                |
+
+---
+
+## Products
+
+### PUT `/api/products`
+
+Adds a product. Requires **admin** role.
+
+**Request Headers**
+
+| Header       | Value                |
+| ------------ | -------------------- |
+| Content-Type | application/json     |
+| Cookie       | Admin session cookie |
+
+**Request Body**
+
+```json
+{
+    "name": "string",
+    "cost": 0
+}
+```
+
+| Field | Type   | Required | Description                 |
+| ----- | ------ | -------- | --------------------------- |
+| name  | string | Yes      | Product name                |
+| cost  | number | Yes      | Cost in INR (2 decimals)    |
+
+**Response** `201 Created`
+
+```json
+{
+    "message": "product created"
+}
+```
+
+**Error Responses**
+
+| Status | Meaning                         |
+| ------ | ------------------------------- |
+| 400    | Missing or invalid fields       |
+| 401    | Not authenticated               |
+| 403    | Authenticated user is not admin |
+
+---
+
+### GET `/api/products`
+
+Lists products. Requires authentication.
+
+**Request Headers**
+
+| Header | Value          |
+| ------ | -------------- |
+| Cookie | Session cookie |
+
+**Response** `200 OK`
+
+```json
+{
+    "products": [
+        {
+            "id": "string",
+            "name": "string",
+            "cost": 0,
+            "created_at": "string",
+            "updated_at": "string"
+        }
+    ]
+}
+```
+
+| Field                | Type   | Description              |
+| -------------------- | ------ | ------------------------ |
+| products             | array  | List of product objects  |
+| products[].id        | string | Product identifier       |
+| products[].name      | string | Product name             |
+| products[].cost      | number | Cost in INR (2 decimals) |
+| products[].created_at| string | RFC3339 timestamp        |
+| products[].updated_at| string | RFC3339 timestamp        |
+
+**Error Responses**
+
+| Status | Meaning           |
+| ------ | ----------------- |
+| 401    | Not authenticated |
+
+---
+
+### DELETE `/api/products/:productId`
+
+Deletes a product. Requires **admin** role.
+
+**Path Parameters**
+
+| Parameter | Type   | Description              |
+| --------- | ------ | ------------------------ |
+| productId | string | ID of the product to delete |
+
+**Request Headers**
+
+| Header | Value                |
+| ------ | -------------------- |
+| Cookie | Admin session cookie |
+
+**Response** `200 OK`
+
+```json
+{
+    "message": "product deleted"
+}
+```
+
+**Error Responses**
+
+| Status | Meaning                         |
+| ------ | ------------------------------- |
+| 401    | Not authenticated               |
+| 403    | Authenticated user is not admin |
+| 404    | Product not found               |

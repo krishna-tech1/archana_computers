@@ -130,3 +130,40 @@ func (q *Queries) ListClients(ctx context.Context) ([]ListClientsRow, error) {
 	}
 	return items, nil
 }
+
+const updateClient = `-- name: UpdateClient :one
+UPDATE clients
+SET name = $2,
+    phone = $3,
+    address = $4,
+    updated_at = NOW()
+WHERE id = $1
+RETURNING id, user_id, name, phone, address, created_at, updated_at
+`
+
+type UpdateClientParams struct {
+	ID      uuid.UUID `json:"id"`
+	Name    string    `json:"name"`
+	Phone   string    `json:"phone"`
+	Address string    `json:"address"`
+}
+
+func (q *Queries) UpdateClient(ctx context.Context, arg UpdateClientParams) (Client, error) {
+	row := q.db.QueryRow(ctx, updateClient,
+		arg.ID,
+		arg.Name,
+		arg.Phone,
+		arg.Address,
+	)
+	var i Client
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.Name,
+		&i.Phone,
+		&i.Address,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}

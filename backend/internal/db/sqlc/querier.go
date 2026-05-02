@@ -12,17 +12,23 @@ import (
 
 type Querier interface {
 	CreateClient(ctx context.Context, arg CreateClientParams) error
+	CreateProduct(ctx context.Context, arg CreateProductParams) error
 	CreateTicket(ctx context.Context, arg CreateTicketParams) (Ticket, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
+	DeleteProduct(ctx context.Context, id uuid.UUID) (uuid.UUID, error)
 	GetClientByID(ctx context.Context, id uuid.UUID) (Client, error)
 	GetClientByUserID(ctx context.Context, userID uuid.UUID) (Client, error)
 	GetTicketByID(ctx context.Context, id uuid.UUID) (GetTicketByIDRow, error)
 	GetUserByEmail(ctx context.Context, email string) (User, error)
 	GetUserByID(ctx context.Context, id uuid.UUID) (User, error)
 	ListClients(ctx context.Context) ([]ListClientsRow, error)
+	ListProducts(ctx context.Context) ([]Product, error)
 	ListTicketsForAdmin(ctx context.Context, dollar_1 string) ([]ListTicketsForAdminRow, error)
 	ListTicketsForClient(ctx context.Context, arg ListTicketsForClientParams) ([]Ticket, error)
+	UpdateClient(ctx context.Context, arg UpdateClientParams) (Client, error)
 	UpdateTicketStatus(ctx context.Context, arg UpdateTicketStatusParams) (Ticket, error)
+	UpdateUserEmail(ctx context.Context, arg UpdateUserEmailParams) (User, error)
+	UpdateUserPassword(ctx context.Context, arg UpdateUserPasswordParams) (User, error)
 }
 
 var _ Querier = (*Queries)(nil)

@@ -3,7 +3,7 @@ import 'dart:async';
 import 'services/api_service.dart';
 import 'client/client_home.dart';
 import 'admin/admin_home.dart';
-import 'login_page.dart';
+import 'product_view_page.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -12,7 +12,8 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
 
@@ -38,7 +39,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
     // Check if there is an active session
     final session = await ApiService().getSavedSession();
-    
+
     if (!mounted) return;
 
     if (session != null) {
@@ -53,9 +54,9 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
         );
       }
     } else {
-      // Go to Login
+      // Go to Product View Page for non-logged in users
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const LoginPage()),
+        MaterialPageRoute(builder: (_) => const ProductViewPage()),
       );
     }
   }
@@ -87,7 +88,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                       color: Colors.black.withValues(alpha: 0.05),
                       blurRadius: 20,
                       spreadRadius: 5,
-                    )
+                    ),
                   ],
                 ),
                 child: ClipOval(
@@ -95,7 +96,11 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                     'assets/images/app_icon.png',
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) {
-                      return const Icon(Icons.computer, size: 80, color: Color(0xFF0D1B3E));
+                      return const Icon(
+                        Icons.computer,
+                        size: 80,
+                        color: Color(0xFF0D1B3E),
+                      );
                     },
                   ),
                 ),

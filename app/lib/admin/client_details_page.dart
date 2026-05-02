@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../models/data_models.dart';
+import '../services/api_service.dart';
 
 class ClientDetailsPage extends StatelessWidget {
   final Client client;
@@ -74,6 +76,11 @@ class ClientDetailsPage extends StatelessWidget {
             const SizedBox(height: 16),
             _buildInfoRow(Icons.location_on_outlined, 'Address', client.address),
 
+            const SizedBox(height: 32),
+            _sectionTitle('Account Security'),
+            const SizedBox(height: 16),
+            _ResetPasswordWidget(clientId: client.id),
+
             const SizedBox(height: 40),
           ],
         ),
@@ -115,6 +122,102 @@ class ClientDetailsPage extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _ResetPasswordWidget extends StatefulWidget {
+  final String clientId;
+  const _ResetPasswordWidget({required this.clientId});
+
+  @override
+  State<_ResetPasswordWidget> createState() => _ResetPasswordWidgetState();
+}
+
+class _ResetPasswordWidgetState extends State<_ResetPasswordWidget> {
+  String? _newPassword;
+  bool _isResetting = false;
+
+  Future<void> _resetPassword() async {
+    setState(() => _isResetting = true);
+    try {
+      final newPassword = await ApiService().resetClientPassword(widget.clientId);
+      if (mounted) {
+        setState(() {
+          _newPassword = newPassword;
+          _isResetting = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isResetting = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error resetting password: $e'), backgroundColor: Colors.red),
+        );
+      }
+    }
+  }
+
+  void _copyToClipboard() {
+    if (_newPassword != null) {
+      Clipboard.setData(ClipboardData(text: _newPassword!));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Password copied to clipboard'), behavior: SnackBarBehavior.floating),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton.icon(
+            onPressed: _isResetting ? null : _resetPassword,
+            icon: _isResetting 
+              ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+              : const Icon(Icons.lock_reset),
+            label: const Text('Reset Account Password'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF0D1B3E),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            ),
+          ),
+        ),
+        if (_newPassword != null) ...[
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.green.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.green.withValues(alpha: 0.2)),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('NEW PASSWORD', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.green)),
+                      const SizedBox(height: 4),
+                      Text(_newPassword!, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF0D1B3E), letterSpacing: 1.5)),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  onPressed: _copyToClipboard,
+                  icon: const Icon(Icons.copy_rounded, color: Colors.green),
+                  tooltip: 'Copy password',
+                ),
+              ],
+            ),
+          ),
+        ],
+      ],
     );
   }
 }

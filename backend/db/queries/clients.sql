@@ -25,3 +25,12 @@ SELECT
 FROM clients c
 JOIN users u ON u.id = c.user_id
 ORDER BY c.created_at DESC;
+
+-- name: UpdateClient :one
+UPDATE clients
+SET name = $2,
+    phone = $3,
+    address = $4,
+    updated_at = NOW()
+WHERE id = $1
+RETURNING id, user_id, name, phone, address, created_at, updated_at;

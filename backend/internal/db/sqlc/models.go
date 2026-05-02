@@ -107,6 +107,14 @@ type Client struct {
 	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
 }
 
+type Product struct {
+	ID        uuid.UUID          `json:"id"`
+	Name      string             `json:"name"`
+	Cost      pgtype.Numeric     `json:"cost"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
+}
+
 type Ticket struct {
 	ID        uuid.UUID          `json:"id"`
 	ClientID  uuid.UUID          `json:"client_id"`

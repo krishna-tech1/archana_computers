@@ -32,12 +32,12 @@ class ApiService {
 
   Future<void> init() async {
     if (_isInitialized) return;
-    
+
     final appDocDir = await getApplicationDocumentsDirectory();
     final String path = '${appDocDir.path}/.cookies/';
     _cookieJar = PersistCookieJar(storage: FileStorage(path));
     _dio.interceptors.add(CookieManager(_cookieJar));
-    
+
     _isInitialized = true;
   }
 
@@ -177,6 +177,65 @@ class ApiService {
       return res.data['password'] as String;
     }
     throw ApiException(_errorMessage(res));
+  }
+
+  Future<void> updateClient({
+    required String id,
+    required String name,
+    required String email,
+    required String phone,
+    required String address,
+  }) async {
+    final res = await _dio.put(
+      '/api/clients/$id',
+      data: {
+        'name': name,
+        'email': email,
+        'phone': phone,
+        'address': address,
+      },
+    );
+    if (res.statusCode != 200) {
+      throw ApiException(_errorMessage(res));
+    }
+  }
+
+  Future<String> resetClientPassword(String clientId) async {
+    final res = await _dio.patch('/api/clients/$clientId/reset-password');
+    if (res.statusCode == 200) {
+      return res.data['password'] as String;
+    }
+    throw ApiException(_errorMessage(res));
+  }
+
+  // ── Products ─────────────────────────────────────────────────────────────
+
+  Future<List<Product>> getProducts() async {
+    final res = await _dio.get('/api/products');
+    if (res.statusCode == 200) {
+      final list = res.data['products'] as List<dynamic>? ?? [];
+      return list
+          .map((e) => Product.fromJson(e as Map<String, dynamic>))
+          .toList();
+    }
+    throw ApiException(_errorMessage(res));
+  }
+
+  Future<void> createProduct({required String name, required double cost}) async {
+    final res = await _dio.put(
+      '/api/products',
+      data: {'name': name, 'cost': cost},
+    );
+    if (res.statusCode != 201) {
+      throw ApiException(_errorMessage(res));
+    }
+  }
+
+  Future<void> deleteProduct(String productId) async {
+    final res = await _dio.delete('/api/products/$productId');
+    if (res.statusCode != 200) {
+      throw ApiException(_errorMessage(res));
+    }
   }
 
   // ── Helpers ───────────────────────────────────────────────────────────────

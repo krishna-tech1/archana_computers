@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import '../models/data_models.dart';
 import '../services/api_service.dart';
 import 'client_details_page.dart';
+import 'add_client_page.dart';
 
 class ClientsListPage extends StatefulWidget {
   const ClientsListPage({super.key});
@@ -181,6 +182,51 @@ class _ClientsListPageState extends State<ClientsListPage> {
                   ),
                 ],
               ),
+            ),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.edit_outlined, size: 20, color: Colors.blue),
+                  onPressed: () async {
+                    final result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => AddClientPage(client: client),
+                      ),
+                    );
+                    if (result == true) {
+                      _fetchClients();
+                    }
+                  },
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete_outline, size: 20, color: Colors.redAccent),
+                  onPressed: () {
+                    // Show confirmation and delete
+                    showDialog(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: const Text('Delete Client'),
+                        content: Text('Are you sure you want to delete ${client.name}?'),
+                        actions: [
+                          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pop(ctx);
+                              // Mock delete
+                              setState(() {
+                                _clients.removeWhere((c) => c.id == client.id);
+                              });
+                            },
+                            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ],
             ),
             Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Colors.grey[300]),
           ],
